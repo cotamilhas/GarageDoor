@@ -27,30 +27,81 @@ else
     <p>Member since: @profile.CreatedAt</p>
     <p>Skill level: @profile.SkillLevel</p>
 
-    <h2>Stats</h2>
-    <table border="1" cellpadding="4">
-        <tr><td>Hearts</td><td>@profile.Hearts</td></tr>
-        <tr><td>Points</td><td>@profile.Points</td></tr>
-        <tr><td>Creator Points</td><td>@profile.CreatorPoints</td></tr>
-        <tr><td>Experience Points</td><td>@profile.ExperiencePoints</td></tr>
-        <tr><td>Rating</td><td>@profile.Rating</td></tr>
-        <tr><td>Tracks Published</td><td>@profile.TotalTracks</td></tr>
-        <tr><td>Karts Published</td><td>@profile.TotalKarts</td></tr>
-        <tr><td>Mods Published</td><td>@profile.TotalCharacters</td></tr>
-    </table>
+    <h2>Creations</h2>
+    <div class="stat-row">
+        <span class="stat-label">Tracks Published</span>
+        <span class="stat-value">@profile.TotalTracks</span>
+    </div>
+    <div class="stat-row">
+        <span class="stat-label">Mods Published</span>
+        <span class="stat-value">@profile.TotalCharacters</span>
+    </div>
+    <div class="stat-row">
+        <span class="stat-label">Karts Published</span>
+        <span class="stat-value">@profile.TotalKarts</span>
+    </div>
 
-    <h2>Racing</h2>
-    <table border="1" cellpadding="4">
-        <tr><td>Online Races</td><td>@profile.OnlineRaces</td></tr>
-        <tr><td>Wins</td><td>@profile.OnlineWins</td></tr>
-        <tr><td>Finished</td><td>@profile.OnlineFinished</td></tr>
-        <tr><td>Forfeit</td><td>@profile.OnlineForfeit</td></tr>
-        <tr><td>Disconnected</td><td>@profile.OnlineDisconnected</td></tr>
-        <tr><td>Win Streak</td><td>@profile.WinStreak</td></tr>
-        <tr><td>Longest Win Streak</td><td>@profile.LongestWinStreak</td></tr>
-        <tr><td>Longest Drift</td><td>@profile.LongestDrift</td></tr>
-        <tr><td>Longest Hang Time</td><td>@profile.LongestHangTime</td></tr>
-    </table>
+    <h2>LBP Karting</h2>
+    <div class="stat-row">
+        <span class="stat-label">Hearts</span>
+        <span class="stat-value">@profile.Hearts</span>
+    </div>
+
+    <h2>ModNation Stats</h2>
+    <div class="stat-row">
+        <span class="stat-label">Points</span>
+        <span class="stat-value">@profile.Points</span>
+    </div>
+    <div class="stat-row">
+        <span class="stat-label">Experience Points</span>
+        <span class="stat-value">@profile.ExperiencePoints</span>
+    </div>
+    <div class="stat-row">
+        <span class="stat-label">Creator Points</span>
+        <span class="stat-value">@profile.CreatorPoints</span>
+    </div>
+    <div class="stat-row">
+        <span class="stat-label">Rating</span>
+        <span class="stat-value">@profile.Rating</span>
+    </div>
+    <div class="stat-row">
+        <span class="stat-label">Longest Drift</span>
+        <span class="stat-value">@profile.LongestDrift</span>
+    </div>
+    <div class="stat-row">
+        <span class="stat-label">Longest Hang Time</span>
+        <span class="stat-value">@profile.LongestHangTime</span>
+    </div>
+
+    <h2>Racing Performance (MNR)</h2>
+    <div class="stat-row">
+        <span class="stat-label">Online Races</span>
+        <span class="stat-value">@profile.OnlineRaces</span>
+    </div>
+    <div class="stat-row">
+        <span class="stat-label">Wins</span>
+        <span class="stat-value">@profile.OnlineWins</span>
+    </div>
+    <div class="stat-row">
+        <span class="stat-label">Finished</span>
+        <span class="stat-value">@profile.OnlineFinished</span>
+    </div>
+    <div class="stat-row">
+        <span class="stat-label">Forfeit</span>
+        <span class="stat-value">@profile.OnlineForfeit</span>
+    </div>
+    <div class="stat-row">
+        <span class="stat-label">Disconnected</span>
+        <span class="stat-value">@profile.OnlineDisconnected</span>
+    </div>
+    <div class="stat-row">
+        <span class="stat-label">Win Streak</span>
+        <span class="stat-value">@profile.WinStreak</span>
+    </div>
+    <div class="stat-row">
+        <span class="stat-label">Longest Win Streak</span>
+        <span class="stat-value">@profile.LongestWinStreak</span>
+    </div>
     <h2>Published Tracks</h2>
 
     @if (tracksLoading)

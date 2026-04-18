@@ -6,96 +6,108 @@
 
 <PageTitle>Tracks – @instanceName</PageTitle>
 
-<h1>Tracks</h1>
+<div class="main-content">
+    <h1>Tracks</h1>
 
-<div>
-    <button @onclick="() => SetGame(GameMode.LBPK)" disabled="@(gameMode == GameMode.LBPK)">LBP Karting</button>
-    <button @onclick="() => SetGame(GameMode.MNR)" disabled="@(gameMode == GameMode.MNR)">ModNation Racers</button>
-    <button @onclick="() => SetGame(GameMode.MNRRT)" disabled="@(gameMode == GameMode.MNRRT)">ModNation Racers: Road Trip</button>
-</div>
+    <div class="controls-row">
+        <div class="button-group">
+            <button @onclick="() => SetGame(GameMode.LBPK)" disabled="@(gameMode == GameMode.LBPK)">LBP Karting</button>
+            <button @onclick="() => SetGame(GameMode.MNR)" disabled="@(gameMode == GameMode.MNR)">ModNation Racers</button>
+            <button @onclick="() => SetGame(GameMode.MNRRT)" disabled="@(gameMode == GameMode.MNRRT)">Road Trip</button>
+        </div>
+    </div>
 
-<div>
-    <input type="search"
-           placeholder="Search tracks..."
-           @bind="keyword"
-           @bind:event="oninput"
-           @onkeydown="OnSearchKeyDown" />
+    <div class="controls-row">
+        <input type="search"
+               placeholder="Search tracks..."
+               @bind="keyword"
+               @bind:event="oninput"
+               @onkeydown="OnSearchKeyDown" />
 
-    <select @bind="sortColumn" @bind:after="ReloadAsync">
-        <option value="created_at">Newest</option>
-        <option value="hearts">Most Hearted</option>
-        <option value="downloads">Most Downloaded</option>
-        <option value="races_started">Most Played</option>
-        <option value="rating_up">Highest Rated</option>
-        <option value="views">Most Viewed</option>
-    </select>
-</div>
+        <select @bind="sortColumn" @bind:after="ReloadAsync">
+            <option value="created_at">Newest</option>
+            <option value="hearts">Most Hearted</option>
+            <option value="downloads">Most Downloaded</option>
+            <option value="races_started">Most Played</option>
+            <option value="rating_up">Highest Rated</option>
+            <option value="views">Most Viewed</option>
+        </select>
+    </div>
 
-@if (loading)
-{
-    <p>Loading...</p>
-}
-else if (result?.Tracks is { Count: 0 })
-{
-    <p>No tracks found.</p>
-}
-else if (result is not null)
-{
-    <p>Showing @result.Tracks.Count of @result.Total tracks — Page @result.Page / @result.TotalPages</p>
+    @if (loading)
+    {
+        <p>Loading...</p>
+    }
+    else if (result?.Tracks is { Count: 0 })
+    {
+        <p>No tracks found.</p>
+    }
+    else if (result is not null)
+    {
+        <p>Showing @result.Tracks.Count of @result.Total tracks — Page @result.Page / @result.TotalPages</p>
 
-    <div style="display:flex; flex-direction:column; gap:0.5rem;">
-        @foreach (var track in result.Tracks)
-        {
-            <div style="border:1px solid black; padding:0.5rem; display:flex; gap:0.75rem; align-items:flex-start;">
-                <a href="/tracks/@track.Id">
-                    <div style="width:128px; height:128px; background:#ccc; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:0.7rem; color:#555;">
-                        <img src="@($"{PLGarage.BaseUrl}/player_creations/{track.Id}/preview_image.png")"
-                             alt="@track.Name"
-                             width="128" height="128"
-                             style="display:block;"
-                             onerror="this.parentElement.innerHTML='No preview'" />
-                    </div>
-                </a>
-                <div>
-                    <div><a href="/tracks/@track.Id"><b>@track.Name</b></a> by <a href="/players/@track.PlayerId">@track.Username</a></div>
-                    @if (!string.IsNullOrWhiteSpace(track.Description))
-                    {
-                        <div>@track.Description</div>
-                    }
-                    <div>♥ @track.Hearts | ⬇ @track.Downloads | 🏁 @track.RacesStarted | 👁 @track.Views</div>
-                    <div style="display:flex; flex-wrap:wrap; gap:4px; margin-top:4px;">
-                        @if (track.NumLaps > 0)
+        <div class="track-list">
+            @foreach (var track in result.Tracks)
+            {
+                <div class="track-card">
+                    <a href="/tracks/@track.Id">
+                        <div class="track-preview">
+                            <img src="@($"{PLGarage.BaseUrl}/player_creations/{track.Id}/preview_image.png")"
+                                 alt="@track.Name"
+                                 onerror="this.style.display='none'; this.parentElement.innerHTML='No preview'" />
+                        </div>
+                    </a>
+                    <div class="track-info">
+                        <div class="track-name">
+                            <a href="/tracks/@track.Id">@track.Name</a>
+                            <span style="font-weight: normal; font-size: 0.9rem; color: #666;">
+                                by <a href="/players/@track.PlayerId">@track.Username</a>
+                            </span>
+                        </div>
+                        
+                        @if (!string.IsNullOrWhiteSpace(track.Description))
                         {
-                            <span style="border:1px solid #999; padding:1px 6px; font-size:0.75rem;">@track.NumLaps laps</span>
+                            <div class="track-description">@track.Description</div>
                         }
-                        @if (!string.IsNullOrEmpty(track.RaceType))
-                        {
-                            <span style="border:1px solid #999; padding:1px 6px; font-size:0.75rem;">@track.RaceType</span>
-                        }
-                        @if (!string.IsNullOrEmpty(track.Difficulty))
-                        {
-                            <span style="border:1px solid #999; padding:1px 6px; font-size:0.75rem;">@track.Difficulty</span>
-                        }
-                        @if (track.IsTeamPick)
-                        {
-                            <span style="border:1px solid #999; padding:1px 6px; font-size:0.75rem;">⭐ Team Pick</span>
-                        }
-                        @foreach (var tag in track.Tags.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
-                        {
-                            <span style="border:1px solid #999; padding:1px 6px; font-size:0.75rem;">@tag</span>
-                        }
+                        
+                        <div class="track-stats">
+                            ♥ @track.Hearts | ⬇ @track.Downloads | 🏁 @track.RacesStarted | 👁 @track.Views
+                        </div>
+
+                        <div class="tag-container">
+                            @if (track.NumLaps > 0)
+                            {
+                                <span class="tag-badge">@track.NumLaps laps</span>
+                            }
+                            @if (!string.IsNullOrEmpty(track.RaceType))
+                            {
+                                <span class="tag-badge">@track.RaceType</span>
+                            }
+                            @if (!string.IsNullOrEmpty(track.Difficulty))
+                            {
+                                <span class="tag-badge">@track.Difficulty</span>
+                            }
+                            @if (track.IsTeamPick)
+                            {
+                                <span class="tag-badge tag-teampick">⭐ Team Pick</span>
+                            }
+                            @foreach (var tag in track.Tags.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+                            {
+                                <span class="tag-badge">@tag</span>
+                            }
+                        </div>
                     </div>
                 </div>
-            </div>
-        }
-    </div>
+            }
+        </div>
 
-    <div>
-        <button disabled="@(result.Page <= 1)" @onclick="PrevPage">← Prev</button>
-        <span>Page @result.Page of @result.TotalPages</span>
-        <button disabled="@(result.Page >= result.TotalPages)" @onclick="NextPage">Next →</button>
-    </div>
-}
+        <div class="pagination-bar">
+            <button disabled="@(result.Page <= 1)" @onclick="PrevPage">← Prev</button>
+            <span>Page @result.Page of @result.TotalPages</span>
+            <button disabled="@(result.Page >= result.TotalPages)" @onclick="NextPage">Next →</button>
+        </div>
+    }
+</div>
 
 @code {
     private CreationsPage? result;
