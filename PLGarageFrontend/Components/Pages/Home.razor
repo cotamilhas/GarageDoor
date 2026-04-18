@@ -1,5 +1,6 @@
 ﻿@page "/"
 @rendermode InteractiveServer
+@using PLGarageFrontend.Models
 @using PLGarageFrontend.Services
 @inject PLGarageService PLGarage
 
@@ -7,18 +8,215 @@
 
 <h1>Welcome to @instanceName!</h1>
 
-<p>@playerCount players online</p>
+<p>
+    @playerCountLBPK LBP Karting / @playerCountMNR ModNation Racers players online
+</p>
+
+<div class="home-columns">
+    <div class="home-column">
+        <h2>Recently Uploaded</h2>
+        @if (recentLoading)
+        {
+            <p>Loading...</p>
+        }
+        else if (recentCreations.Count == 0)
+        {
+            <p>Nothing yet.</p>
+        }
+        else
+        {
+            <div class="home-scroll">
+                @foreach (var c in recentCreations)
+                {
+                    <div class="home-card">
+                        <a href="/tracks/@c.Id">
+                            <div class="home-card-thumb">
+                                <img src="@($"{PLGarage.BaseUrl}/player_creations/{c.Id}/preview_image.png")"
+                                     alt="@c.Name"
+                                     onerror="this.parentElement.innerHTML=''" />
+                            </div>
+                        </a>
+                        <div class="home-card-info">
+                            <div><a href="/tracks/@c.Id"><b>@c.Name</b></a></div>
+                            <div class="home-card-sub">by <a href="/players/@c.PlayerId">@c.Username</a> @c.Game</div>
+                            <div class="home-card-stats">♥ @c.Hearts | ⬇ @c.Downloads</div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+
+    <div class="home-column">
+        <h2>⭐ Team Picks</h2>
+        @if (teamPicksLoading)
+        {
+            <p>Loading...</p>
+        }
+        else if (teamPicks.Count == 0)
+        {
+            <p>No team picks yet.</p>
+        }
+        else
+        {
+            <div class="home-scroll">
+                @foreach (var c in teamPicks)
+                {
+                    <div class="home-card">
+                        <a href="/tracks/@c.Id">
+                            <div class="home-card-thumb">
+                                <img src="@($"{PLGarage.BaseUrl}/player_creations/{c.Id}/preview_image.png")"
+                                     alt="@c.Name"
+                                     onerror="this.parentElement.innerHTML=''" />
+                            </div>
+                        </a>
+                        <div class="home-card-info">
+                            <div><a href="/tracks/@c.Id"><b>@c.Name</b></a></div>
+                            <div class="home-card-sub">by <a href="/players/@c.PlayerId">@c.Username</a> @c.Game</div>
+                            <div class="home-card-stats">♥ @c.Hearts | ⬇ @c.Downloads</div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    .home-columns {
+        display: flex;
+        gap: 2rem;
+        margin-top: 1.5rem;
+        align-items: flex-start;
+    }
+
+    .home-column {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .home-scroll {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        max-height: 600px;
+        overflow-y: auto;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        padding: 0.5rem;
+        background: #fff;
+    }
+
+    .home-card {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+        padding: 0.5rem;
+        border-radius: 4px;
+        transition: background 0.1s;
+    }
+
+        .home-card:hover {
+            background: #f5f5f5;
+        }
+
+    .home-card-thumb {
+        width: 64px;
+        height: 64px;
+        flex-shrink: 0;
+        background: #eee;
+        border-radius: 4px;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .home-card-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+    .home-card-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+        min-width: 0;
+    }
+
+        .home-card-info a {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: block;
+        }
+
+    .home-card-sub {
+        font-size: 0.8rem;
+        color: #666;
+    }
+
+    .home-card-stats {
+        font-size: 0.8rem;
+        color: #888;
+    }
+</style>
 
 @code {
     private string instanceName = "PL Garage";
-    private int playerCount = 0;
+    private int playerCountLBPK = 0;
+    private int playerCountMNR = 0;
+    private List<TrackCreation> recentCreations = [];
+    private List<TrackCreation> teamPicks = [];
+    private bool recentLoading = true;
+    private bool teamPicksLoading = true;
 
     protected override async Task OnInitializedAsync()
     {
         var nameTask = PLGarage.GetInstanceNameAsync();
-        var countTask = PLGarage.GetPlayerCountAsync();
-        await Task.WhenAll(nameTask, countTask);
+        var lbpkCountTask = PLGarage.GetPlayerCountAsync(isMnr: false);
+        var mnrCountTask = PLGarage.GetPlayerCountAsync(isMnr: true);
+        await Task.WhenAll(nameTask, lbpkCountTask, mnrCountTask);
         instanceName = nameTask.Result;
-        playerCount = countTask.Result;
+        playerCountLBPK = lbpkCountTask.Result;
+        playerCountMNR = mnrCountTask.Result;
+
+        var lbpkRecentTask = PLGarage.GetTracksAsync(1, 20, "created_at", "desc", isMnr: false);
+        var mnrRecentTask = PLGarage.GetTracksAsync(1, 20, "created_at", "desc", isMnr: true);
+        var mnrCreationsTask = PLGarage.GetCreationsByTypeAsync(1, "CHARACTER", "PS3", 10, "created_at", "desc");
+        await Task.WhenAll(lbpkRecentTask, mnrRecentTask, mnrCreationsTask);
+
+        var lbpkRecent = lbpkRecentTask.Result.Tracks;
+        lbpkRecent.ForEach(c => c.Game = "LBPK");
+
+        var mnrRecent = mnrRecentTask.Result.Tracks;
+        mnrRecent.ForEach(c => c.Game = c.Platform == "PSV" ? "MNR: RT" : "MNR");
+
+        var mnrChars = mnrCreationsTask.Result.Tracks;
+        mnrChars.ForEach(c => c.Game = c.Platform == "PSV" ? "MNR: RT" : "MNR");
+
+        recentCreations = lbpkRecent
+            .Concat(mnrRecent)
+            .Concat(mnrChars)
+            .OrderByDescending(c => c.FirstPublished)
+            .Take(40)
+            .ToList();
+        recentLoading = false;
+        var lbpkPicksTask = PLGarage.GetTeamPicksAsync(isMnr: false);
+        var mnrPicksTask = PLGarage.GetTeamPicksAsync(isMnr: true);
+        await Task.WhenAll(lbpkPicksTask, mnrPicksTask);
+
+        teamPicks = lbpkPicksTask.Result.Tracks
+            .Concat(mnrPicksTask.Result.Tracks)
+            .OrderByDescending(c => c.FirstPublished)
+            .ToList();
+        teamPicksLoading = false;
     }
+
+    private string GameLabel(TrackCreation c) => c.Platform switch
+    {
+        "PSV" => "MNR: RT",
+        _ => c.RaceType == "" && c.NumLaps == 0 ? "MNR" : "LBPK"
+    };
 }

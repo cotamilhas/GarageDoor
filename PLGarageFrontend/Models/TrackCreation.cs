@@ -20,9 +20,12 @@ public class TrackCreation
     public string Tags { get; set; } = "";
     public bool IsTeamPick { get; set; }
     public bool IsRemixable { get; set; }
+    public bool IsMNR { get; set; }
     public string FirstPublished { get; set; } = "";
     public string UpdatedAt { get; set; } = "";
     public string Platform { get; set; } = "";
+    public string Game { get; set; } = "";
+
 }
 
 public class CreationsPage

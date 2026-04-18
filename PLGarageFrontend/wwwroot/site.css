@@ -27,7 +27,6 @@ a {
     padding: 0 1.5rem;
     height: 52px;
     background: #111;
-    /* I will eventually make this accent customizable serverside but for now its orange */
     border-bottom: 2px solid #f07822;
 }
 
@@ -240,24 +239,22 @@ tr:hover td {
     margin-top: 6px;
 }
 
-.tag-badge,
-span[style*="border:1px solid #999"] {
+.tag-badge {
     display: inline-block;
-    background: #eee !important;
-    border: 1px solid #ccc !important;
-    padding: 1px 8px !important;
+    background: #eee;
+    border: 1px solid #ccc;
+    padding: 1px 8px;
     border-radius: 3px;
-    font-size: 0.75rem !important;
-    color: #444 !important;
+    font-size: 0.75rem;
+    color: #444;
     white-space: nowrap;
 }
 
-.tag-teampick,
-span[style*="⭐ Team Pick"] {
-    background: #fff3e0 !important;
-    border-color: #f07822 !important;
-    color: #e65100 !important;
-    font-weight: bold !important;
+.tag-teampick {
+    background: #fff3e0;
+    border-color: #f07822;
+    color: #e65100;
+    font-weight: bold;
 }
 
 .pagination-bar {

@@ -1,0 +1,126 @@
+﻿@page "/mods"
+@rendermode InteractiveServer
+@using PLGarageFrontend.Models
+@using PLGarageFrontend.Services
+@inject PLGarageService PLGarage
+
+<PageTitle>Mods – @instanceName</PageTitle>
+
+<h1>Mods</h1>
+
+<div class="controls-row">
+    <div class="button-group">
+        <button @onclick="() => SetPlatform(PS3)" disabled="@(platform == "PS3")">ModNation Racers</button>
+        <button @onclick="() => SetPlatform(PSV)" disabled="@(platform == "PSV")">MNR: Road Trip</button>
+    </div>
+    <input type="search"
+           placeholder="Search mods..."
+           @bind="keyword"
+           @bind:event="oninput"
+           @onkeydown="OnSearchKeyDown" />
+    <select @bind="sortColumn" @bind:after="ReloadAsync">
+        <option value="created_at">Newest</option>
+        <option value="hearts">Most Hearted</option>
+        <option value="downloads">Most Downloaded</option>
+        <option value="rating_up">Highest Rated</option>
+        <option value="views">Most Viewed</option>
+    </select>
+</div>
+
+@if (loading)
+{
+    <p>Loading...</p>
+}
+else if (result?.Tracks is { Count: 0 })
+{
+    <p>No mods found.</p>
+}
+else if (result is not null)
+{
+    <p>Showing @result.Tracks.Count of @result.Total mods — Page @result.Page / @result.TotalPages</p>
+
+    <div class="track-list">
+        @foreach (var mod in result.Tracks)
+        {
+            <div class="track-card">
+                <div class="track-preview">
+                    <img src="@($"{PLGarage.BaseUrl}/player_creations/{mod.Id}/preview_image.png")"
+                         alt="@mod.Name"
+                         onerror="this.parentElement.innerHTML='No preview'" />
+                </div>
+                <div class="track-info">
+                    <div class="track-name">@mod.Name</div>
+                    <div>by <a href="/players/@mod.PlayerId">@mod.Username</a></div>
+                    @if (!string.IsNullOrWhiteSpace(mod.Description))
+                    {
+                        <div>@mod.Description</div>
+                    }
+                    <div class="track-stats">♥ @mod.Hearts | ⬇ @mod.Downloads | 👁 @mod.Views</div>
+                    <div class="tag-container">
+                        @if (mod.IsTeamPick)
+                        {
+                            <span class="tag-badge tag-teampick">⭐ Team Pick</span>
+                        }
+                        @foreach (var tag in mod.Tags.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+                        {
+                            <span class="tag-badge">@tag</span>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="pagination-bar">
+        <button disabled="@(result.Page <= 1)" @onclick="PrevPage">← Prev</button>
+        <span>Page @result.Page of @result.TotalPages</span>
+        <button disabled="@(result.Page >= result.TotalPages)" @onclick="NextPage">Next →</button>
+    </div>
+}
+
+@code {
+    private CreationsPage? result;
+    private bool loading = true;
+    private int page = 1;
+    private string instanceName = "PL Garage";
+    private string sortColumn = "created_at";
+    private string keyword = "";
+    private string platform = "PS3";
+    private const string PS3 = "PS3";
+    private const string PSV = "PSV";
+
+    protected override async Task OnInitializedAsync()
+    {
+        instanceName = await PLGarage.GetInstanceNameAsync();
+        await ReloadAsync();
+    }
+
+    private async Task SetPlatform(string p)
+    {
+        platform = p;
+        page = 1;
+        await ReloadAsync();
+    }
+
+    private async Task ReloadAsync()
+    {
+        loading = true;
+        result = await PLGarage.GetCreationsByTypeAsync(page, "CHARACTER", platform, sortColumn: sortColumn, keyword: keyword);
+        loading = false;
+    }
+
+    private async Task PrevPage()
+    {
+        if (page > 1) { page--; await ReloadAsync(); }
+    }
+
+    private async Task NextPage()
+    {
+        if (result is not null && page < result.TotalPages) { page++; await ReloadAsync(); }
+    }
+
+    private async Task OnSearchKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") { page = 1; await ReloadAsync(); }
+    }
+}

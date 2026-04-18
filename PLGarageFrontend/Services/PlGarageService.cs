@@ -100,9 +100,11 @@ public class PLGarageService(HttpClient http)
         catch { return "PL Garage"; }
     }
 
-    public async Task<int> GetPlayerCountAsync()
+    public async Task<int> GetPlayerCountAsync(bool? isMnr = null)
     {
-        try { return int.Parse(await http.GetStringAsync($"{BaseUrl}/api/playercounts/sessioncount")); }
+        var url = $"{BaseUrl}/api/playercounts/sessioncount";
+        if (isMnr.HasValue) url += $"?isMnr={isMnr.Value.ToString().ToLower()}";
+        try { return int.Parse(await http.GetStringAsync(url)); }
         catch { return 0; }
     }
     public async Task<PlayerProfile?> GetPlayerInfoAsync(int playerId)
@@ -263,5 +265,67 @@ public class PLGarageService(HttpClient http)
             Console.WriteLine($"GetTracksByUsernameAsync failed: {ex.Message}");
             return new CreationsPage();
         }
+    }
+
+    public async Task<CreationsPage> GetCreationsByTypeAsync(
+    int page = 1,
+    string type = "CHARACTER",
+    string platform = "PS3",
+    int perPage = 20,
+    string sortColumn = "created_at",
+    string sortOrder = "desc",
+    string? keyword = null)
+    {
+        var url = $"{BaseUrl}/player_creations/search.xml" +
+                  $"?page={page}" +
+                  $"&per_page={perPage}" +
+                  $"&platform={platform}" +
+                  $"&sort_column={sortColumn}" +
+                  $"&sort_order={sortOrder}" +
+                  $"&filters[player_creation_type]={type}";
+
+        if (!string.IsNullOrWhiteSpace(keyword))
+            url += $"&search={Uri.EscapeDataString(keyword)}";
+
+        try
+        {
+            var xml = await http.GetStringAsync(url);
+            return ParseCreationsPage(xml);
+        }
+        catch { return new CreationsPage(); }
+    }
+
+    // player_creations/search.xml with filters[player_id] works unauthenticated
+    // unlike the profile endpoint which uses session context for MNR counts
+    // why is it like this jack??? answer me!!! 
+    // yk its probably something related to UFG...
+    // and I'm not going to put lbpk logic in here because I am too lazy to rewrite code.
+    public async Task<int> GetCreationCountAsync(int playerId, string type, string platform = "PS3")
+    {
+        try
+        {
+            var url = $"{BaseUrl}/player_creations/search.xml" +
+                      $"?page=1&per_page=1&platform={platform}" +
+                      $"&filters[player_creation_type]={type}" +
+                      $"&filters[player_id]={playerId}";
+            var xml = await http.GetStringAsync(url);
+            var doc = XDocument.Parse(xml);
+            return (int?)doc.Descendants("player_creations").FirstOrDefault()?.Attribute("total") ?? 0;
+        }
+        catch { return 0; }
+    }
+
+    public async Task<CreationsPage> GetTeamPicksAsync(bool isMnr = false, string platform = "PS3", int perPage = 40)
+    {
+        var url = isMnr
+            ? $"{BaseUrl}/player_creations/team_picks.xml?per_page={perPage}&platform={platform}&sort_column=created_at&sort_order=desc&filters[player_creation_type]=TRACK"
+            : $"{BaseUrl}/tracks/ufg_picks.xml?per_page={perPage}&platform={platform}&sort_column=created_at&sort_order=desc";
+
+        try
+        {
+            var xml = await http.GetStringAsync(url);
+            return ParseCreationsPage(xml);
+        }
+        catch { return new CreationsPage(); }
     }
 }
