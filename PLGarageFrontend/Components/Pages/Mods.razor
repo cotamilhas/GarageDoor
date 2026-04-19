@@ -3,6 +3,7 @@
 @using PLGarageFrontend.Models
 @using PLGarageFrontend.Services
 @inject PLGarageService PLGarage
+
 <HeadContent>
     <link rel="stylesheet" href="css/mods.css" />
 </HeadContent>
@@ -13,8 +14,8 @@
 
 <div class="controls-row">
     <div class="button-group">
-        <button @onclick="() => SetPlatform(PS3)" disabled="@(platform == "PS3")">ModNation Racers</button>
-        <button @onclick="() => SetPlatform(PSV)" disabled="@(platform == "PSV")">MNR: Road Trip</button>
+        <button @onclick="() => SetPlatform(PS3)" disabled="@(platform == PS3)">ModNation Racers</button>
+        <button @onclick="() => SetPlatform(PSV)" disabled="@(platform == PSV)">MNR: Road Trip</button>
     </div>
     <input type="search"
            placeholder="Search mods..."
@@ -46,13 +47,15 @@ else if (result is not null)
         @foreach (var mod in result.Tracks)
         {
             <div class="track-card">
-                <div class="track-preview">
-                    <img src="@($"{PLGarage.BaseUrl}/player_creations/{mod.Id}/preview_image.png")"
-                         alt="@mod.Name"
-                         onerror="this.parentElement.innerHTML='No preview'" />
-                </div>
+                <a href="/mods/@mod.Id">
+                    <div class="track-preview">
+                        <img src="@($"{PLGarage.BaseUrl}/player_creations/{mod.Id}/preview_image.png")"
+                             alt="@mod.Name"
+                             onerror="this.parentElement.innerHTML='No preview'" />
+                    </div>
+                </a>
                 <div class="track-info">
-                    <div class="track-name">@mod.Name</div>
+                    <div class="track-name"><a href="/mods/@mod.Id">@mod.Name</a></div>
                     <div>by <a href="/players/@mod.PlayerId">@mod.Username</a></div>
                     @if (!string.IsNullOrWhiteSpace(mod.Description))
                     {

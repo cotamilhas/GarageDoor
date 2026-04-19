@@ -45,32 +45,34 @@ else if (result is not null)
     <div class="track-list">
         @foreach (var kart in result.Tracks)
         {
-            <div class="track-card">
-                <div class="track-preview">
-                    <img src="@($"{PLGarage.BaseUrl}/player_creations/{kart.Id}/preview_image.png")"
-                         alt="@kart.Name"
-                         onerror="this.parentElement.innerHTML='No preview'" />
-                </div>
-                <div class="track-info">
-                    <div class="track-name">@kart.Name</div>
-                    <div>by <a href="/players/@kart.PlayerId">@kart.Username</a></div>
-                    @if (!string.IsNullOrWhiteSpace(kart.Description))
-                    {
-                        <div>@kart.Description</div>
-                    }
-                    <div class="track-stats">♥ @kart.Hearts | ⬇ @kart.Downloads | 👁 @kart.Views</div>
-                    <div class="tag-container">
-                        @if (@kart.IsTeamPick)
+            <a href="/karts/@kart.Id">
+                <div class="track-card">
+                    <div class="track-preview">
+                        <img src="@($"{PLGarage.BaseUrl}/player_creations/{kart.Id}/preview_image.png")"
+                             alt="@kart.Name"
+                             onerror="this.parentElement.innerHTML='No preview'" />
+                    </div>
+                    <div class="track-info">
+                        <div class="track-name"><a href="/karts/@kart.Id">@kart.Name</a></div>
+                        <div>by <a href="/players/@kart.PlayerId">@kart.Username</a></div>
+                        @if (!string.IsNullOrWhiteSpace(kart.Description))
                         {
-                            <span class="tag-badge tag-teampick">⭐ Team Pick</span>
+                            <div>@kart.Description</div>
                         }
-                        @foreach (var tag in kart.Tags.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
-                        {
-                            <span class="tag-badge">@tag</span>
-                        }
+                        <div class="track-stats">♥ @kart.Hearts | ⬇ @kart.Downloads | 👁 @kart.Views</div>
+                        <div class="tag-container">
+                            @if (@kart.IsTeamPick)
+                            {
+                                <span class="tag-badge tag-teampick">⭐ Team Pick</span>
+                            }
+                            @foreach (var tag in kart.Tags.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+                            {
+                                <span class="tag-badge">@tag</span>
+                            }
+                        </div>
                     </div>
                 </div>
-            </div>
+            </a>
         }
     </div>
 

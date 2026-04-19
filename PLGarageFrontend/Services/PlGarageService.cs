@@ -328,4 +328,36 @@ public class PLGarageService(HttpClient http)
         }
         catch { return new CreationsPage(); }
     }
+
+    public async Task<TrackCreation?> GetCreationByIdAsync(int id)
+    {
+        try
+        {
+            var xml = await http.GetStringAsync($"{BaseUrl}/player_creations/{id}.xml?is_counted=false");
+            var doc = XDocument.Parse(xml);
+            var x = doc.Descendants("player_creation").FirstOrDefault();
+            if (x == null) return null;
+
+            return new TrackCreation
+            {
+                Id = (int?)x.Attribute("id") ?? 0,
+                PlayerId = (int?)x.Attribute("player_id") ?? 0,
+                Name = (string?)x.Attribute("name") ?? "Unnamed",
+                Username = (string?)x.Attribute("username") ?? "Unknown",
+                Description = (string?)x.Attribute("description") ?? "",
+                Downloads = (int?)x.Attribute("downloads") ?? 0,
+                Hearts = (int?)x.Attribute("hearts") ?? 0,
+                RatingUp = (int?)x.Attribute("rating_up") ?? 0,
+                RatingDown = (int?)x.Attribute("rating_down") ?? 0,
+                Views = (int?)x.Attribute("views") ?? 0,
+                RacesStarted = (int?)x.Attribute("races_started") ?? 0,
+                Tags = (string?)x.Attribute("tags") ?? "",
+                IsTeamPick = (bool?)x.Attribute("is_team_pick") ?? false,
+                FirstPublished = (string?)x.Attribute("first_published") ?? "",
+                UpdatedAt = (string?)x.Attribute("updated_at") ?? "",
+                Platform = (string?)x.Attribute("platform") ?? "",
+            };
+        }
+        catch { return null; }
+    }
 }
