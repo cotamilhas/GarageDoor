@@ -5,7 +5,7 @@ namespace PLGarageFrontend.Services;
 
 public class PLGarageService(HttpClient http)
 {
-    public string BaseUrl { get; set; } = "http://karting.playbredum.ru";
+    public string BaseUrl { get; set; } = "https://karting.playbredum.ru";
 
     public async Task<CreationsPage> GetTracksAsync(
         int page = 1,
@@ -17,8 +17,8 @@ public class PLGarageService(HttpClient http)
         string platform = "PS3")
     {
         // LBPK uses /tracks.xml, MNR uses /player_creations/search.xml.
-        // This is really weird decision, though its probably not jacks decision,
-        // but UFGs. Thanks, UFG!
+        // This is really weird decision by UFG
+        // Thanks, UFG!
         string endpoint = isMnr
             ? $"{BaseUrl}/player_creations/search.xml?filters[player_creation_type]=TRACK"
             : $"{BaseUrl}/tracks.xml?";
@@ -399,5 +399,66 @@ public class PLGarageService(HttpClient http)
             return (string?)doc.Descendants("policy").FirstOrDefault()?.Attribute("text") ?? "";
         }
         catch { return ""; }
+    }
+
+    public async Task<LobbyPage> GetLobbiesAsync(int page = 1, int perPage = 50)
+    {
+        var url = $"{BaseUrl}/multiplayer_games.xml?page={page}&per_page={perPage}";
+
+        try
+        {
+            var xml = await http.GetStringAsync(url);
+            var doc = XDocument.Parse(xml);
+
+            var wrapper = doc.Descendants("games").FirstOrDefault();
+            var result = new LobbyPage
+            {
+                Total = (int?)wrapper?.Attribute("total") ?? 0,
+                TotalPages = (int?)wrapper?.Attribute("total_pages") ?? 0,
+                Page = (int?)wrapper?.Attribute("page") ?? 1,
+            };
+
+            result.Lobbies = doc.Descendants("game")
+                .Select(x => new Lobby
+                {
+                    Id = (int?)x.Attribute("id") ?? 0,
+                    Name = (string?)x.Attribute("name") ?? "",
+                    TrackId = (int?)x.Attribute("track") ?? 0,
+                    HostPlayerId = (int?)x.Attribute("host_player_id") ?? 0,
+                    CurPlayers = (int?)x.Attribute("cur_players") ?? 0,
+                    MaxPlayers = (int?)x.Attribute("max_players") ?? 0,
+                    MinPlayers = (int?)x.Attribute("min_players") ?? 0,
+                    GameType = (string?)x.Attribute("game_type") ?? "",
+                    GameStateId = (int?)x.Attribute("game_state_id") ?? 0,
+                    SpeedClass = (string?)x.Attribute("speed_class") ?? "",
+                    NumberLaps = (int?)x.Attribute("number_laps") ?? 0,
+                    IsRanked = (bool?)x.Attribute("is_ranked") ?? false,
+                })
+                .Where(g => g.GameType != "CHARACTER_CREATORS") // filter out ModSpot
+                .ToList();
+
+            return result;
+        }
+        catch { return new LobbyPage(); }
+    }
+
+    public async Task<CreationsPage> GetTracksByPlayerIdAsync(int playerId, bool isMnr = false, string platform = "PS3", string username = "")
+    {
+        // this hack is very bad and wastes processing time
+        // pls fix filtering by player_id
+        // this hack doesn't work for some reason What
+        var url = isMnr
+            ? $"{BaseUrl}/player_creations/search.xml?filters[player_creation_type]=TRACK&per_page=100&platform={platform}&sort_column=created_at&sort_order=desc"
+            : $"{BaseUrl}/tracks.xml?per_page=100&platform={platform}&sort_column=created_at&sort_order=desc";
+
+        try
+        {
+            var xml = await http.GetStringAsync(url);
+            var page = ParseCreationsPage(xml);
+            if (!string.IsNullOrEmpty(username))
+                page.Tracks = page.Tracks.Where(t => t.Username == username).ToList();
+            return page;
+        }
+        catch { return new CreationsPage(); }
     }
 }

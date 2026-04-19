@@ -3,6 +3,7 @@
 @using PLGarageFrontend.Models
 @using PLGarageFrontend.Services
 @inject PLGarageService PLGarage
+@inject IJSRuntime JS
 
 <HeadContent>
     <link rel="stylesheet" href="css/profile.css" />
@@ -20,7 +21,6 @@ else if (profile == null)
 }
 else
 {
-    @inject IJSRuntime JS
 
     <button @onclick="GoBack">← Back</button>
     <div class="profile-header">
@@ -243,8 +243,8 @@ else
             var mnrModPSVTask = PLGarage.GetCreationCountAsync(Id, "CHARACTER", "PSV");
             var mnrKartPS3Task = PLGarage.GetCreationCountAsync(Id, "KART", "PS3");
             var mnrKartPSVTask = PLGarage.GetCreationCountAsync(Id, "KART", "PSV");
-            var lbpkTask = PLGarage.GetTracksByUsernameAsync(profile.Username, isMnr: false);
-            var mnrTask = PLGarage.GetTracksByUsernameAsync(profile.Username, isMnr: true);
+            var lbpkTask = PLGarage.GetTracksByPlayerIdAsync(Id, isMnr: false, username: profile.Username);
+            var mnrTask = PLGarage.GetTracksByPlayerIdAsync(Id, isMnr: true, username: profile.Username);
 
             await Task.WhenAll(mnrTrackCountTask, mnrModPS3Task, mnrModPSVTask,
                                mnrKartPS3Task, mnrKartPSVTask, lbpkTask, mnrTask);

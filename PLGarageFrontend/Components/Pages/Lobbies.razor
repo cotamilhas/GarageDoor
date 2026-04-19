@@ -1,0 +1,126 @@
+﻿@page "/lobbies"
+@rendermode InteractiveServer
+@using PLGarageFrontend.Models
+@using PLGarageFrontend.Services
+@inject PLGarageService PLGarage
+@inject StringMapService StringMap
+
+<HeadContent>
+    <link rel="stylesheet" href="css/lobbies.css" />
+</HeadContent>
+
+<PageTitle>Lobbies – @instanceName</PageTitle>
+
+<h1>Lobbies</h1>
+<p>Find other players to play with.</p>
+
+@if (loading)
+{
+    <p>Loading...</p>
+}
+else if (result == null || result.Lobbies.Count == 0)
+{
+    <div class="lobby-empty">
+        <p>No open lobbies right now.</p>
+    </div>
+}
+else
+{
+    <div class="lobby-list">
+        @foreach (var lobby in result.Lobbies.OrderBy(l => l.IsPending ? 0 : 1))
+        {
+            <div class="lobby-card @(!lobby.IsPending ? "started" : "")">
+                <div class="lobby-track-thumb">
+                    <img src="@($"{PLGarage.BaseUrl}/player_creations/{lobby.TrackId}/preview_image.png")"
+                         alt="Track preview"
+                         onerror="this.parentElement.innerText=''" />
+                </div>
+                <div class="lobby-info">
+                    <div class="lobby-track-name">
+                        @GetTrackName(lobby.TrackId)
+                    </div>
+                    <div class="lobby-sub">
+                        @FriendlyGameType(lobby.GameType)
+                        @if (!string.IsNullOrEmpty(lobby.SpeedClass))
+                        {
+                            <span> · @lobby.SpeedClass</span>
+                        }
+                        @if (lobby.NumberLaps > 0)
+                        {
+                            <span> · @lobby.NumberLaps laps</span>
+                        }
+                        @if (lobby.IsRanked)
+                        {
+                            <span> · Ranked</span>
+                        }
+                    </div>
+                    <div class="lobby-game-badge">@lobby.Game</div>
+                </div>
+                <div class="lobby-right">
+                    <span class="lobby-players">@lobby.CurPlayers / @lobby.MaxPlayers 👤</span>
+                    @if (lobby.IsPending)
+                    {
+                        <span class="lobby-status-pending">Open</span>
+                    }
+                    else
+                    {
+                        <span class="lobby-status-started">In Progress</span>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private LobbyPage? result;
+    private bool loading = true;
+    private string instanceName = "PL Garage";
+    private Dictionary<int, string> trackNames = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        instanceName = await PLGarage.GetInstanceNameAsync();
+        result = await PLGarage.GetLobbiesAsync();
+
+        // batch fetch track names for tracks not inside the stringmap
+        if (result != null)
+        {
+            var ids = result.Lobbies
+                .Select(l => l.TrackId)
+                .Where(id => id > 0 && !StringMap.Has(id))
+                .Distinct()
+                .ToList();
+
+            var tasks = ids.Select(id => PLGarage.GetTrackByIdAsync(id));
+            var tracks = await Task.WhenAll(tasks);
+
+            trackNames = ids.Zip(tracks)
+                .Where(x => x.Second != null)
+                .ToDictionary(x => x.First, x => x.Second!.Name);
+        }
+
+        loading = false;
+    }
+
+    private string GetTrackName(int trackId)
+    {
+        if (trackId <= 0) return "Unknown Track";
+        if (StringMap.Has(trackId)) return StringMap.GetName(trackId);
+        return trackNames.TryGetValue(trackId, out var name) ? name : $"Track #{trackId}";
+    }
+
+    private static string FriendlyGameType(string gameType) => gameType switch
+    {
+        "RACE" => "Race",
+        "BATTLE" => "Battle",
+        "SCORE_ATTACK" => "Score Attack",
+        "BUBBLE_CHASE" => "Bubble Chase",
+        "ONLINE_PURE_RACE" => "Pure Race",
+        "ONLINE_ACTION_RACE" => "Action Race",
+        "ONLINE_TIME_TRIAL_RACE" => "Time Trial",
+        "ONLINE_LKS_RACE" => "LKS Race",
+        "ONLINE_HOT_SEAT_RACE" => "Hot Seat",
+        _ => gameType
+    };
+}

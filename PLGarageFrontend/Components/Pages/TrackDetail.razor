@@ -3,12 +3,14 @@
 @using PLGarageFrontend.Models
 @using PLGarageFrontend.Services
 @inject PLGarageService PLGarage
+@inject StringMapService StringMap
+@inject IJSRuntime JS
 
 <HeadContent>
     <link rel="stylesheet" href="css/trackdetail.css" />
 </HeadContent>
 
-<PageTitle>@(track?.Name ?? "Track") – @instanceName</PageTitle>
+<PageTitle>@(StringMap.Has(Id) ? StringMap.GetName(Id) : track?.Name ?? "Track") – @instanceName</PageTitle>
 
 @if (loading)
 {
@@ -20,9 +22,8 @@ else if (track == null)
 }
 else
 {
-    @inject IJSRuntime JS
-
     <button @onclick="GoBack">← Back</button>
+
     <div class="track-detail-header">
         <div class="track-detail-preview">
             <img src="@($"{PLGarage.BaseUrl}/player_creations/{track.Id}/preview_image.png")"
@@ -30,13 +31,31 @@ else
                  onerror="this.parentElement.innerHTML='No preview'" />
         </div>
         <div class="track-detail-meta">
-            <h1>@track.Name</h1>
-            <p>by <a href="/players/@track.PlayerId">@track.Username</a></p>
-            @if (!string.IsNullOrWhiteSpace(track.Description))
-            {
-                <p>@track.Description</p>
+            @{
+                var smEntry = StringMap.Get(track.Id);
+                var displayName = smEntry != null ? smEntry.Name : track.Name;
+                var displayDesc = smEntry?.Description is { Length: > 0 } d && d != "???" ? d : track.Description;
+                var curator = smEntry?.Curator;
             }
+
+            <h1>@displayName</h1>
+
+            @if (!string.IsNullOrWhiteSpace(curator))
+            {
+                <p>by <a href="/players/1">@curator</a></p>
+            }
+            else
+            {
+                <p>by <a href="/players/@track.PlayerId">@track.Username</a></p>
+            }
+
+            @if (!string.IsNullOrWhiteSpace(displayDesc))
+            {
+                <p>@displayDesc</p>
+            }
+
             <p class="track-detail-stats">♥ @track.Hearts | ⬇ @track.Downloads | 🏁 @track.RacesStarted | 👁 @track.Views</p>
+
             <div class="tag-container">
                 @if (track.NumLaps > 0)
                 {
@@ -137,6 +156,7 @@ else
     private int gameType = 701;
     private int playgroupSize = 1;
     private int lbPage = 1;
+
     private async Task GoBack() => await JS.InvokeVoidAsync("history.back");
 
     protected override async Task OnInitializedAsync()

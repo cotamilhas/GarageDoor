@@ -4,6 +4,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddHttpClient<PLGarageFrontend.Services.PLGarageService>();
+builder.Services.AddSingleton<PLGarageFrontend.Services.StringMapService>();
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 

@@ -97,3 +97,34 @@ public class PhotosPage
     public int TotalPages { get; set; }
     public int Page { get; set; }
 }
+
+public class Lobby
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = "";
+    public int TrackId { get; set; }
+    public int HostPlayerId { get; set; }
+    public int CurPlayers { get; set; }
+    public int MaxPlayers { get; set; }
+    public int MinPlayers { get; set; }
+    public string GameType { get; set; } = "";
+    public int GameStateId { get; set; }
+    public string SpeedClass { get; set; } = "";
+    public int NumberLaps { get; set; }
+    public bool IsRanked { get; set; }
+
+    public bool IsPending => GameStateId == 0;
+    public string Game => GameType switch
+    {
+        "RACE" or "BATTLE" or "SCORE_ATTACK" or "BUBBLE_CHASE" => "LBPK",
+        _ => "MNR"
+    };
+}
+
+public class LobbyPage
+{
+    public List<Lobby> Lobbies { get; set; } = [];
+    public int Total { get; set; }
+    public int TotalPages { get; set; }
+    public int Page { get; set; }
+}

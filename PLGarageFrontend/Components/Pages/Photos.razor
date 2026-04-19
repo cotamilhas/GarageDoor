@@ -4,6 +4,7 @@
 @using PLGarageFrontend.Services
 @inject PLGarageService PLGarage
 @inject NavigationManager Nav
+@inject StringMapService StringMap
 
 <HeadContent>
     <link rel="stylesheet" href="css/photos.css" />
@@ -126,13 +127,13 @@ else
         loading = false;
     }
 
-    private string GetTrackName(int trackId) => trackId switch
+    private string GetTrackName(int trackId)
     {
-        575 or 4912 => "The Pod",
-        // if the track doesn't exist, but a photo was taken there and it's not The Pod, we can assume it's
-        // on the moon.
-        _ => trackNames.TryGetValue(trackId, out var name) ? name : "The Moon"
-    };
+        if (trackId <= 0) return "The Moon";
+        var entry = StringMap.Get(trackId);
+        if (entry != null) return entry.Name;
+        return trackNames.TryGetValue(trackId, out var name) ? name : "The Moon";
+    }
 
     private async Task PrevPage()
     {

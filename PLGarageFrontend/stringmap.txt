@@ -1,0 +1,79 @@
+# GarageDoor Stringmap
+# Format: ID|Display Name|Description|Curator
+
+# Special
+575|The Pod|???|UFG
+4912|The Pod|???|UFG
+
+# LBPK Story Levels
+845|Karting Lessons|???|The Queen
+753|Karting Lessons|???|The Queen
+861|Karting Lessons|???|The Queen
+758|Karting Lessons|???|The Queen
+576|Garden Grip|What is a little Sackthing like you doing in a Hoard kart? Show the Queen and her royal subjects that you can beat The Hoard karters at their own game... er, race.|The Queen
+612|Garden Grip (Versus)|???|The Queen
+734|After The Wedding|???|The Queen
+510|After The Wedding (Versus)|???|The Queen
+755|Serpent's Shrine|???|The Queen
+657|Serpent's Shrine (Versus)|???|The Queen
+930|Mine The Gap|???|The Queen
+610|Mine The Gap (Versus)|???|The Queen
+777|King's Castle|???|The Queen
+501|King's Castle (Versus)|???|The Queen
+869|Turtle Island|???|Ray The Wonder Turtle
+729|Turtle Island (Versus)|???|Ray The Wonder Turtle
+596|The Emperor Has No Clues|???|Ray The Wonder Turtle
+760|The Emperor Has No Clues (Versus)|???|Ray The Wonder Turtle
+699|Huge Monster Rally|???|Ray The Wonder Turtle
+705|Huge Monster Rally (Versus)|???|Ray The Wonder Turtle
+939|Night Rider|???|Ray The Wonder Turtle
+903|Night Rider (Versus)|???|Ray The Wonder Turtle
+609|Egg Hunt?|???|Ray The Wonder Turtle
+647|Egg Kartin?|???|Ray The Wonder Turtle
+915|Egg Kartin? (Versus)|???|Ray The Wonder Turtle
+529|Star Fishin'|???|Ray The Wonder Turtle
+684|Sugar Rush|???|Vernon The Lab Rat
+582|Sugar Rush (Versus)|???|Vernon The Lab Rat
+849|Don't Go Baking My Kart|???|Vernon The Lab Rat
+790|Current Events|???|Vernon The Lab Rat
+857|Current Events (Versus)|???|Vernon The Lab Rat
+715|Cakes on a Train|The Hoard are making away with trains full of Victoria's creations. See if you can score a moral victory for Vernon and his walloping waistline!|Vernon The Lab Rat
+738|Cakes on a Train (Versus)|???|Vernon The Lab Rat
+625|Future Perfect|???|Don Doubtworthy
+959|Future Perfect (Versus)|???|Don Doubtworthy
+998|Zeppelins Rule!|???|Don Doubtworthy
+520|Zeppelins Rule! (Versus)|???|Don Doubtworthy
+881|The Infallible Breakfast Machine|???|Don Doubtworthy
+828|The Infallible Breakfast Machine (Versus)|???|Don Doubtworthy
+712|Stuck in a Jam|???|Don Doubtworthy
+840|World's Fair in Love and War|???|Don Doubtworthy
+624|World's Fair in Love and War (Versus)|???|Don Doubtworthy
+811|Best Before Date|???|Don Doubtworthy
+614|Best Before Date (Versus)|???|Don Doubtworthy
+823|Monster Trucks|???|Don Doubtworthy
+918|Tank Combat|???|Don Doubtworthy
+1049|Roots Of All Evil|???|Venus The Flytrap
+821|Roots Of All Evil (Versus)|???|Venus The Flytrap
+702|Firebug Circuit|???|Venus The Flytrap
+913|Firebug Circuit (Versus)|???|Venus The Flytrap
+766|Venus Speedtrap RC???|???|Venus The Flytrap
+606|On The Wormpath|???|Venus The Flytrap
+550|2.0 Bee Or Not 2.0 Bee|???|Capt. Sirius Oculus
+708|2.0 Bee Or Not 2.0 Bee (Versus)|???|Capt. Sirius Oculus
+648|RoboBun Test Chamber|???|Capt. Sirius Oculus
+772|RoboBun Test Chamber (Versus)|???|Capt. Sirius Oculus
+688|Huge Spaceship|???|Capt. Sirius Oculus
+579|Huge Spaceship (Versus)|???|Capt. Sirius Oculus
+539|Assault on Batteries|???|Capt. Sirius Oculus
+698|Lost In Bass|???|Capt. Sirius Oculus
+759|Lost In Bass (Versus)|???|Capt. Sirius Oculus
+763|Ride Scroller|???|Capt. Sirius Oculus
+941|Drum Smash|???|Capt. Sirius Oculus
+630|Drum Smash (Versus)|???|Capt. Sirius Oculus
+697|The Funkhole (And Beyond?)|???|Capt. Sirius Oculus
+808|The Funkhole (And Beyond?) (Versus)|???|Capt. Sirius Oculus
+1023|Full Tilt|???|Capt. Sirius Oculus
+703|The Garage at the End of the Craftverse|???|The Hoard
+951|Savannah Rally??|???|The Queen
+689|Craftworld GP??|???|The Queen
+814|Sackboy RC??|???|The Queen
