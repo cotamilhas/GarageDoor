@@ -444,20 +444,23 @@ public class PLGarageService(HttpClient http)
 
     public async Task<CreationsPage> GetTracksByPlayerIdAsync(int playerId, bool isMnr = false, string platform = "PS3", string username = "")
     {
-        // this hack is very bad and wastes processing time
-        // pls fix filtering by player_id
-        // this hack doesn't work for some reason What
-        var url = isMnr
-            ? $"{BaseUrl}/player_creations/search.xml?filters[player_creation_type]=TRACK&per_page=100&platform={platform}&sort_column=created_at&sort_order=desc"
-            : $"{BaseUrl}/tracks.xml?per_page=100&platform={platform}&sort_column=created_at&sort_order=desc";
+        string url;
+        if (isMnr)
+            url = $"{BaseUrl}/player_creations/friends_view.xml" +
+                  $"?filters[player_creation_type]=TRACK" +
+                  $"&filters[username]={Uri.EscapeDataString(username)}" +
+                  $"&page=1&per_page=100&platform={platform}" +
+                  $"&sort_column=created_at&sort_order=desc";
+        else
+            url = $"{BaseUrl}/tracks.xml" +
+                  $"?filters[username]={Uri.EscapeDataString(username)}" +
+                  $"&page=1&per_page=100&platform={platform}" +
+                  $"&sort_column=created_at&sort_order=desc";
 
         try
         {
             var xml = await http.GetStringAsync(url);
-            var page = ParseCreationsPage(xml);
-            if (!string.IsNullOrEmpty(username))
-                page.Tracks = page.Tracks.Where(t => t.Username == username).ToList();
-            return page;
+            return ParseCreationsPage(xml);
         }
         catch { return new CreationsPage(); }
     }
