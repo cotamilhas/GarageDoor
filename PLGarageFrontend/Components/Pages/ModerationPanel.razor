@@ -4,6 +4,8 @@
 @using System.Text.Json
 @inject ModerationService Moderation
 @inject NavigationManager Nav
+@inject Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage.ProtectedLocalStorage ProtectedLocalStorage
+@inject IJSRuntime JSRuntime
 
 <PageTitle>Moderation Panel</PageTitle>
 
@@ -13,9 +15,8 @@
 
 @if (!Moderation.IsLoggedIn)
 {
-    <p>You are not logged in., and you do not have permission to access this page.</p>
+    <p>You are not logged in, and you do not have permission to access this page.</p>
     <p>If you are a moderator of this instance, <a href="/moderation/login">Log in here</a>.</p>
-    <p style="color: #999; font-size: 0.85rem;"></p>
 }
 else
 {
@@ -28,100 +29,144 @@ else
         </div>
     </div>
 
-    <section class="mod-section">
-        <h2>Announcements</h2>
-        
-        <div class="mod-create-announcement">
-            <h3>Create new announcement</h3>
-            <div class="mod-form">
-                <div class="mod-field">
-                    <label>Platform</label>
-                    <select @bind="newPlatform">
-                        <option value="PS3">ModNation Racers</option>
-                        <option value="PSV">ModNation Racers: Road Trip</option>
-                        <option value="PSP">ModNation Racers PSP</option>
-                        <option value="WEB">WEB</option>
-                    </select>
-                </div>
-                <div class="mod-field">
-                    <label>Language Code</label>
-                    <input type="text" @bind="newLanguageCode" placeholder="en-US" />
-                </div>
-                <div class="mod-field">
-                    <label>Subject</label>
-                    <input type="text" @bind="newSubject" placeholder="Important Update" />
-                </div>
-                <div class="mod-field">
-                    <label>Text</label>
-                    <textarea @bind="newText" rows="4" placeholder="Announcement message..."></textarea>
-                </div>
-                <button @onclick="CreateAnnouncement" disabled="@creating">
-                    @(creating ? "Creating..." : "Create announcement")
-                </button>
-                @if (!string.IsNullOrEmpty(createMessage))
-                {
-                    <p class="mod-message">@createMessage</p>
-                }
+    <div class="mod-panel-layout">
+        <div class="mod-tabs-vertical">
+            <div class="mod-tab-item @(activeTab == "server" ? "active" : "")" @onclick='() => activeTab = "server"'>
+                Server Management
+            </div>
+            <div class="mod-tab-item @(activeTab == "creations" ? "active" : "")" @onclick='() => activeTab = "creations"'>
+                Creation Management
             </div>
         </div>
 
-        <div class="mod-announcements-list">
-            <h3>Existing announcements</h3>
-            @if (loadingAnnouncements)
-            {
-                <p>Loading...</p>
-            }
-            else if (announcements.Count == 0)
-            {
-                <p>No announcements found.</p>
-            }
-            else
-            {
-                <table class="mod-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Platform</th>
-                            <th>Lang</th>
-                            <th>Subject</th>
-                            <th>Text</th>
-                            <th>Created</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var a in announcements)
+        <div class="mod-tab-content">
+            <div class="mod-tab-pane @(activeTab == "server" ? "active" : "")">
+                <section class="mod-section">
+                    <h2>Announcements</h2>
+                    
+                    <div class="mod-create-announcement">
+                        <h3>Create new announcement</h3>
+                        <div class="mod-form">
+                            <div class="mod-field">
+                                <label>Platform</label>
+                                <select @bind="newPlatform">
+                                    <option value="PS3">ModNation Racers (PS3)</option>
+                                    <option value="PSV">ModNation Racers: Road Trip (PSV)</option>
+                                    <option value="PSP">ModNation Racers (PSP)</option>
+                                    <option value="WEB">WEB</option>
+                                </select>
+                            </div>
+                            <div class="mod-field">
+                                <label>Language Code</label>
+                                <input type="text" @bind="newLanguageCode" placeholder="en-US" />
+                            </div>
+                            <div class="mod-field">
+                                <label>Subject</label>
+                                <input type="text" @bind="newSubject" placeholder="Important Update" />
+                            </div>
+                            <div class="mod-field">
+                                <label>Text</label>
+                                <textarea @bind="newText" rows="4" placeholder="Announcement message..."></textarea>
+                            </div>
+                            <button @onclick="CreateAnnouncement" disabled="@creating">
+                                @(creating ? "Creating..." : "Create Announcement")
+                            </button>
+                            @if (!string.IsNullOrEmpty(createMessage))
+                            {
+                                <p class="mod-message">@createMessage</p>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="mod-announcements-list">
+                        <h3>Existing Announcements</h3>
+                        @if (loadingAnnouncements)
                         {
-                            <tr>
-                                <td>@a.Id</td>
-                                <td>@a.Platform</td>
-                                <td>@a.LanguageCode</td>
-                                <td>@a.Subject</td>
-                                <td class="mod-text-preview">@a.Text</td>
-                                <td>@a.CreatedAt</td>
-                                <td>
-                                    <button @onclick="() => DeleteAnnouncement(a.Id)"
-                                            disabled="@deleting"
-                                            class="mod-delete-btn">
-                                        Delete
-                                    </button>
-                                </td>
-                            </tr>
+                            <p>Loading...</p>
                         }
-                    </tbody>
-                </table>
-                
-                <div class="mod-pagination">
-                    <button @onclick="PrevPage" disabled="@(currentPage <= 1 || loadingAnnouncements)">Previous</button>
-                    <span>Page @currentPage of @totalPages</span>
-                    <button @onclick="NextPage" disabled="@(currentPage >= totalPages || loadingAnnouncements)">Next</button>
-                </div>
-            }
+                        else if (announcements.Count == 0)
+                        {
+                            <p>No announcements found.</p>
+                        }
+                        else
+                        {
+                            <table class="mod-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Platform</th>
+                                        <th>Lang</th>
+                                        <th>Subject</th>
+                                        <th>Text</th>
+                                        <th>Created</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var a in announcements)
+                                    {
+                                        <tr>
+                                            <td>@a.Id</td>
+                                            <td>@a.Platform</td>
+                                            <td>@a.LanguageCode</td>
+                                            <td>@a.Subject</td>
+                                            <td class="mod-text-preview">@a.Text</td>
+                                            <td>@a.CreatedAt</td>
+                                            <td>
+                                                <button @onclick="() => DeleteAnnouncement(a.Id)"
+                                                        disabled="@deleting"
+                                                        class="mod-delete-btn">
+                                                    Delete
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                            
+                            <div class="mod-pagination">
+                                <button @onclick="PrevAnnouncementsPage" disabled="@(announcementsPage <= 1 || loadingAnnouncements)">Previous</button>
+                                <span>Page @announcementsPage of @announcementsTotalPages</span>
+                                <button @onclick="NextAnnouncementsPage" disabled="@(announcementsPage >= announcementsTotalPages || loadingAnnouncements)">Next</button>
+                            </div>
+                        }
+                    </div>
+                </section>
+            </div>
+
+            <div class="mod-tab-pane @(activeTab == "creations" ? "active" : "")">
+                <section class="mod-section">
+                    <h2>Team Picks</h2>
+                    
+                    <div class="mod-create-announcement">
+                        <h3>Team Pick a creation</h3>
+                        <div class="mod-form">
+                            <div class="mod-field">
+                                <label>Creation ID</label>
+                                <input type="number" @bind="teamPickCreationId" placeholder="Enter creation ID" />
+                            </div>
+                            <button @onclick="SetTeamPick" disabled="@settingTeamPick">
+                                @(settingTeamPick ? "Setting..." : "Set as Team Pick")
+                            </button>
+                            @if (!string.IsNullOrEmpty(teamPickMessage))
+                            {
+                                <p class="mod-message">@teamPickMessage</p>
+                            }
+                        </div>
+                    </div>
+                </section>
+            </div>
         </div>
-    </section>
+    </div>
 }
 
 @code {
+    private string activeTab = "server";
+    private string modUsername = "";
+    private bool debug_storage_token_present = false;
+    private int debug_storage_token_length = 0;
+    private bool debug_storage_username_present = false;
+
     private class Announcement
     {
         public int Id { get; set; }
@@ -134,8 +179,8 @@ else
 
     private List<Announcement> announcements = new();
     private bool loadingAnnouncements = false;
-    private int currentPage = 1;
-    private int totalPages = 1;
+    private int announcementsPage = 1;
+    private int announcementsTotalPages = 1;
     private const int perPage = 20;
 
     private string newPlatform = "PS3";
@@ -146,6 +191,15 @@ else
     private string createMessage = "";
     private bool deleting = false;
 
+    private int teamPickCreationId = 0;
+    private bool settingTeamPick = false;
+    private string teamPickMessage = "";
+
+    protected override Task OnInitializedAsync()
+    {
+        return Task.CompletedTask;
+    }
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender)
@@ -155,6 +209,14 @@ else
         {
             await Moderation.InitializeAsync();
             modUsername = Moderation.Username;
+
+            try
+            {
+
+                var u = await ProtectedLocalStorage.GetAsync<string>("mod_username");
+                debug_storage_username_present = u.Success && !string.IsNullOrEmpty(u.Value);
+            }
+            catch { }
 
             if (!Moderation.IsLoggedIn)
             {
@@ -173,7 +235,7 @@ else
         loadingAnnouncements = true;
         try
         {
-            var result = await Moderation.GetAnnouncementsAsync(currentPage, perPage);
+            var result = await Moderation.GetAnnouncementsAsync(announcementsPage, perPage);
             if (result != null)
             {
                 var doc = JsonDocument.Parse(result);
@@ -182,7 +244,7 @@ else
                 if (root.TryGetProperty("Total", out var totalProp))
                 {
                     var total = totalProp.GetInt32();
-                    totalPages = (int)Math.Ceiling(total / (double)perPage);
+                    announcementsTotalPages = (int)Math.Ceiling(total / (double)perPage);
                 }
                 
                 if (root.TryGetProperty("Page", out var pageProp) && pageProp.ValueKind == JsonValueKind.Array)
@@ -271,33 +333,67 @@ else
         }
     }
 
-    private async Task PrevPage()
+    private async Task SetTeamPick()
     {
-        if (currentPage > 1)
+        if (teamPickCreationId <= 0)
         {
-            currentPage--;
+            teamPickMessage = "Please enter a valid creation ID.";
+            return;
+        }
+
+        settingTeamPick = true;
+        teamPickMessage = "";
+
+        try
+        {
+            var result = await Moderation.SetModerationStatusAsync(teamPickCreationId, "TEAM_PICK");
+            if (result == "ok")
+            {
+                teamPickMessage = $"Creation {teamPickCreationId} is now a Team Pick!";
+                teamPickCreationId = 0;
+            }
+            else if (result == null)
+            {
+                teamPickMessage = "Creation not found or you don't have permission.";
+            }
+            else
+            {
+                teamPickMessage = $"Failed: {result}";
+            }
+        }
+        catch (Exception ex)
+        {
+            teamPickMessage = $"Error: {ex.Message}";
+        }
+        finally
+        {
+            settingTeamPick = false;
+        }
+    }
+
+    private async Task PrevAnnouncementsPage()
+    {
+        if (announcementsPage > 1)
+        {
+            announcementsPage--;
             await LoadAnnouncements();
         }
     }
 
-    private async Task NextPage()
+    private async Task NextAnnouncementsPage()
     {
-        if (currentPage < totalPages)
+        if (announcementsPage < announcementsTotalPages)
         {
-            currentPage++;
+            announcementsPage++;
             await LoadAnnouncements();
         }
     }
 
-    private string modUsername = "";
-
-    private async Task DoLogout()
+    private void DoLogout()
     {
-        await Moderation.Logout();
+        Moderation.Logout();
         Nav.NavigateTo("/moderation/login");
     }
-
-    [Inject] private IJSRuntime JSRuntime { get; set; } = default!;
 
     private static string PlatformIntToString(int platformInt)
     {

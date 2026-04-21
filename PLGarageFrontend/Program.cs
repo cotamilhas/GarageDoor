@@ -1,4 +1,5 @@
 using PLGarageFrontend.Components;
+using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 
 var builder = WebApplication.CreateBuilder(args);
 
