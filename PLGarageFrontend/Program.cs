@@ -14,10 +14,6 @@ builder.WebHost.ConfigureKestrel(options =>
 {
     options.ListenAnyIP(httpPort);
 
-    options.ListenAnyIP(httpsPort, listenOptions =>
-    {
-        listenOptions.UseHttps();
-    });
 });
 
 // Add services to the container.
@@ -42,7 +38,7 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection();
 
 app.UseAntiforgery();
 
